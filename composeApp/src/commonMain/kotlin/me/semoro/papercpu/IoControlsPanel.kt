@@ -142,6 +142,7 @@ fun IoControlsPanel(viewModel: SimulatorViewModel, modifier: Modifier = Modifier
 interface SimulationControlViewModel {
     val isRunning: StateFlow<Boolean>
     val isHalted: StateFlow<Boolean>
+    val historyEmpty: StateFlow<Boolean>
     fun step()
     fun stepBack(): Boolean
     fun toggleRun()
@@ -156,6 +157,7 @@ fun ControlRow(
 ) {
     val isRunning by viewModel.isRunning.collectAsState()
     val isHalted by viewModel.isHalted.collectAsState()
+    val isHistoryEmpty by viewModel.historyEmpty.collectAsState()
     val coroutineScope = rememberCoroutineScope()
 
     // Check if viewModel is SimulatorViewModel to enable save/load functionality
@@ -300,7 +302,7 @@ fun ControlRow(
     ) {
         IconButton(
             onClick = { viewModel.stepBack() },
-            enabled = !isRunning,
+            enabled = !isRunning && !isHistoryEmpty,
             modifier = Modifier.weight(1f)
         ) {
             Icon(Icons.Rounded.SkipPrevious, contentDescription = "Step Back")
@@ -379,6 +381,7 @@ fun ControlRowPreview() {
         val previewViewModel = object : SimulationControlViewModel {
             override val isRunning = kotlinx.coroutines.flow.MutableStateFlow(false)
             override val isHalted = kotlinx.coroutines.flow.MutableStateFlow(false)
+            override val historyEmpty: StateFlow<Boolean> = kotlinx.coroutines.flow.MutableStateFlow(false)
             override fun step() {}
             override fun stepBack(): Boolean = true
             override fun toggleRun() {}

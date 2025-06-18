@@ -3,7 +3,6 @@ package me.semoro.papercpu
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateSetOf
 import androidx.compose.runtime.snapshots.SnapshotStateMap
-import androidx.compose.runtime.snapshots.SnapshotStateSet
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import kotlinx.coroutines.CoroutineScope
@@ -16,12 +15,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.format
 import kotlinx.datetime.toLocalDateTime
-import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
 
 
 data class CellNodePositions(
@@ -70,6 +65,7 @@ class SimulatorViewModel: ValueCellNodePositionContainer, SimulationControlViewM
 
     private val _isHalted = MutableStateFlow(false)
     override val isHalted: StateFlow<Boolean> = _isHalted.asStateFlow()
+    override val historyEmpty: StateFlow<Boolean> = simulator.historyEmpty
 
     private val _outputLog = MutableStateFlow<List<Int>>(emptyList())
     val outputLog: StateFlow<List<Int>> = _outputLog.asStateFlow()

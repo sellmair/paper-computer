@@ -63,6 +63,9 @@ class Simulator {
 
     val output = MutableSharedFlow<Int?>(replay = 1)
 
+    private val _historyEmpty = MutableStateFlow<Boolean>(false)
+    val historyEmpty: StateFlow<Boolean> = _historyEmpty.asStateFlow()
+
 
     // History buffer for step-back debugging
     private val historyBuffer = ArrayDeque<HistoryEntry>(100) // Fixed size of 100 entries
@@ -179,6 +182,7 @@ class Simulator {
                 valueDst = memory[dst]
             )
         )
+        _historyEmpty.value = historyBuffer.isEmpty()
     }
 
     /**
@@ -208,6 +212,8 @@ class Simulator {
         decodeCurrentInstructionAndUpdatePointers()
 
         output.tryEmit(null)
+
+        _historyEmpty.value = historyBuffer.isEmpty()
 
         return true
     }
@@ -284,6 +290,7 @@ class Simulator {
     fun reset() {
         resetMemory()
         historyBuffer.clear()
+        _historyEmpty.value = historyBuffer.isEmpty()
     }
 
     /**
@@ -301,7 +308,9 @@ class Simulator {
             }
 
             _memory.value = newMemory
+
             historyBuffer.clear() // Clear history on manual edit
+            _historyEmpty.value = historyBuffer.isEmpty()
         }
     }
 
