@@ -7,7 +7,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PauseCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -202,7 +201,6 @@ fun RowValueCard(
     // Breakpoint properties
     isBreakpoint: Boolean = false,
     onToggleBreakpoint: ((Int) -> Unit)? = null,
-    isAtBreakpoint: Boolean = false,
 
     // Identifier properties
     address: Int? = null,

@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun ProgramRomPanel(viewModel: SimulatorViewModel,
                     modifier: Modifier = Modifier) {
-    val memory by viewModel.memory.collectAsState()
+
     val readPointer by viewModel.readPointer.collectAsState()
     val writePointer by viewModel.writePointer.collectAsState()
     val isRunning by viewModel.isRunning.collectAsState()
@@ -37,13 +37,13 @@ fun ProgramRomPanel(viewModel: SimulatorViewModel,
             ControlRow(viewModel)
             InstructionInfo(viewModel)
 
+            val memory by viewModel.memory.collectAsState()
             // Program ROM editor
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                items(List(50) { it + 50 }) { address ->
-                    val value1 = memory[address]
+                items(memory.mapIndexed { idx, v -> idx to v }.takeLast(50)) { (address, value1) ->
                     val src = value1 / 100
                     val dst = value1 % 100
                     RowValueCard(
@@ -66,7 +66,6 @@ fun ProgramRomPanel(viewModel: SimulatorViewModel,
                         // Breakpoint properties
                         isBreakpoint = viewModel.hasBreakpoint(address),
                         onToggleBreakpoint = { addr: Int -> viewModel.toggleBreakpoint(addr) },
-                        isAtBreakpoint = address == memory[1] && viewModel.hasBreakpoint(address),
                         address = address,
                         isEditable = true,
                         additionalContent = {
