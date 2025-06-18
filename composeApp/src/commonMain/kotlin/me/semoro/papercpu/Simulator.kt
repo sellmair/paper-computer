@@ -42,6 +42,7 @@ class Simulator {
 
     init {
         resetMemory()
+        resetProgram()
         decodeCurrentInstructionAndUpdatePointers()
     }
 
@@ -182,20 +183,30 @@ class Simulator {
     }
 
     fun resetMemory() {
-        val newMemory = IntArray(100)
+        val newMemory = _memory.value.copyOf()
+
+        newMemory.fill(0, 0, 50)
 
         // Special addresses
         newMemory[HALT] = 0 // HALT opcode
         newMemory[PC] = 50 // PC starts at address 50
 
         // Initialize operands
-        newMemory[OP_A] = 42 // A = 42
-        newMemory[OP_B] = 10 // B = 10
-        newMemory[OP_C] = 1  // C = 1
+        newMemory[OP_A] = 0 // A = 42
+        newMemory[OP_B] = 0 // B = 10
+        newMemory[OP_C] = 0  // C = 1
 
         // Compute derived registers
         recomputeDerivedRegisters(newMemory)
 
+        _memory.value = newMemory
+
+        decodeCurrentInstructionAndUpdatePointers()
+    }
+
+    fun resetProgram() {
+        val newMemory = _memory.value.copyOf()
+        newMemory.fill(0, fromIndex = 50)
         // Sample program: Copy values around and then halt
         // 50: MOV A to TMP (0209) - Copy A (addr 02) to TMP (addr 09)
         // 51: MOV B to A (0302) - Copy B (addr 03) to A (addr 02)
@@ -211,8 +222,6 @@ class Simulator {
         newMemory[55] = 1
 
         _memory.value = newMemory
-
-        decodeCurrentInstructionAndUpdatePointers()
     }
 
     /**

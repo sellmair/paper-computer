@@ -175,6 +175,10 @@ class SimulatorViewModel: ValueCellNodePositionContainer, SimulationControlViewM
         saveProgram()
     }
 
+    override fun clearProgram() {
+        simulator.resetProgram()
+    }
+
     /**
      * Updates a memory cell with a new value and saves the program.
      */

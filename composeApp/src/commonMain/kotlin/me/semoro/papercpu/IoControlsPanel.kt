@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Pause
 import androidx.compose.material.icons.rounded.SkipNext
@@ -116,6 +117,8 @@ interface SimulationControlViewModel {
     fun stepBack(): Boolean
     fun toggleRun()
     fun reset()
+
+    fun clearProgram()
 }
 
 @Composable
@@ -163,6 +166,14 @@ fun ControlRow(
         ) {
             Icon(Icons.Rounded.Refresh, contentDescription = "Reset")
         }
+
+        IconButton(
+            onClick = { viewModel.clearProgram() },
+            enabled = !isRunning,
+            modifier = Modifier.weight(1f)
+        ) {
+            Icon(Icons.Rounded.Clear, contentDescription = "Clear")
+        }
     }
 }
 
@@ -176,6 +187,7 @@ fun ControlRowPreview() {
             override fun stepBack(): Boolean = true
             override fun toggleRun() {}
             override fun reset() {}
+            override fun clearProgram() {}
         }
 
         ControlRow(
