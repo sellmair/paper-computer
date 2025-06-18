@@ -54,11 +54,7 @@ fun App() {
                     modifier = Modifier.weight(0.5f)
                 )
             }
-//            // Draw arrow overlay if both read and write pointers are set
-//            if (readPointer != null && writePointer != null &&
-//                readPointer != writePointer &&
-//                cellPositions.containsKey(readPointer) &&
-//                cellPositions.containsKey(writePointer)) {
+
 
             val editingPos by viewModel.editingCellAddress.collectAsState()
             val rp = viewModel.readPointer.collectAsState()
@@ -85,6 +81,7 @@ fun App() {
             if (editingPos == null) {
                 // Draw arrow overlay between read and write pointers
                 if (cellPositions.containsKey(rp.value) && cellPositions.containsKey(wp.value)) {
+                    // Draw arrow overlay if both read and write pointers are set
 
                     val from = animateOffsetAsState(cellPositions[rp.value]!!.readNodeOffset)
                     val to = animateOffsetAsState(cellPositions[wp.value]!!.writeNodeOffset)
@@ -116,7 +113,6 @@ fun App() {
                     )
                 }
             }
-//            }
         }
     }
 }
