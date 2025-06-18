@@ -156,25 +156,6 @@ fun RegistersPanel(viewModel: SimulatorViewModel, modifier: Modifier = Modifier.
                 isReadFrom = 10 == readPointer,
                 isWrittenTo = 10 == writePointer
             )
-            RegisterRow(
-                viewModel = viewModel,
-                name = "OUT",
-                address = 11,
-                value = memory[11],
-                isReadFrom = 11 == readPointer,
-                isWrittenTo = 11 == writePointer
-            )
-            RegisterRow(
-                viewModel = viewModel,
-                name = "IN",
-                address = 12,
-                value = memory[12],
-                isReadFrom = 12 == readPointer,
-                isWrittenTo = 12 == writePointer
-            )
-
-            // Current instruction
-//            Spacer(modifier = Modifier.Companion.weight(1f))
         }
     }
 }

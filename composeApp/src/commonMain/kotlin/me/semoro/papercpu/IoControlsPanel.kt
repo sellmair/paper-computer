@@ -31,6 +31,9 @@ fun IoControlsPanel(viewModel: SimulatorViewModel, modifier: Modifier = Modifier
 
     val isHalted by viewModel.isHalted.collectAsState()
     val outputLog by viewModel.outputLog.collectAsState()
+    val memory by viewModel.memory.collectAsState()
+    val readPointer by viewModel.readPointer.collectAsState()
+    val writePointer by viewModel.writePointer.collectAsState()
 
     val isWaitingForInput = viewModel.readPointer.collectAsState().value == Simulator.INP
 
@@ -49,6 +52,14 @@ fun IoControlsPanel(viewModel: SimulatorViewModel, modifier: Modifier = Modifier
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
+            RegisterRow(
+                viewModel = viewModel,
+                name = "IN",
+                address = Simulator.INP,
+                value = memory[Simulator.INP],
+                isReadFrom = Simulator.INP == readPointer,
+                isWrittenTo = Simulator.INP == writePointer
+            )
             // Input field
             var inputValue by remember { mutableStateOf("") }
 
@@ -76,8 +87,14 @@ fun IoControlsPanel(viewModel: SimulatorViewModel, modifier: Modifier = Modifier
                 )
             )
 
-
-
+            RegisterRow(
+                viewModel = viewModel,
+                name = "OUT",
+                address = Simulator.OUT,
+                value = memory[Simulator.OUT],
+                isReadFrom = Simulator.OUT == readPointer,
+                isWrittenTo = Simulator.OUT == writePointer
+            )
 
             // Output log
             Row(
