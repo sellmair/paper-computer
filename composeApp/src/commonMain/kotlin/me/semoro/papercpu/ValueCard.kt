@@ -146,7 +146,7 @@ fun ValueCard(
                 // Address
                 if (address != null) {
                     Text(
-                        text = address.toString().padStart(2, '0'),
+                        text = "@${address.toString().padStart(2, '0')}",
                         style = MaterialTheme.typography.labelSmall,
                         modifier = Modifier.align(Alignment.TopStart)
                     )
@@ -181,15 +181,15 @@ fun ValueCard(
                     ValueCardInner(value, address, modifier = Modifier.align(Alignment.Center), valueCellNodePositionContainer)
                 }
 
-                // PC indicator
-                if (isPC) {
-                    Text(
-                        text = "PC",
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.labelSmall,
-                        modifier = Modifier.align(Alignment.TopEnd)
-                    )
-                }
+//                // PC indicator
+//                if (isPC) {
+//                    Text(
+//                        text = "PC",
+//                        color = MaterialTheme.colorScheme.primary,
+//                        style = MaterialTheme.typography.labelSmall,
+//                        modifier = Modifier.align(Alignment.TopEnd)
+//                    )
+//                }
 
                 // Read indicator
                 if (isReadFrom) {
@@ -233,40 +233,40 @@ fun ValueCard(
                             color = if (isSpecial) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                         )
 
-                        if (isPC) {
-                            Text(
-                                text = " PC",
-                                color = MaterialTheme.colorScheme.primary,
-                                style = MaterialTheme.typography.labelSmall,
-                                modifier = Modifier.padding(start = 4.dp)
-                            )
-                        }
+//                        if (isPC) {
+//                            Text(
+//                                text = " PC",
+//                                color = MaterialTheme.colorScheme.primary,
+//                                style = MaterialTheme.typography.labelSmall,
+//                                modifier = Modifier.padding(start = 4.dp)
+//                            )
+//                        }
                     }
                 } else if (address != null) {
                     Box(
                         modifier = Modifier.width(40.dp)
                     ) {
                         Text(
-                            text = address.toString().padStart(2, '0'),
+                            text = "@${address.toString().padStart(2, '0')}",
                             modifier = Modifier.align(Alignment.CenterStart)
                         )
 
-                        if (isPC) {
-                            Text(
-                                text = "PC",
-                                color = MaterialTheme.colorScheme.primary,
-                                style = MaterialTheme.typography.labelSmall,
-                                modifier = Modifier.align(Alignment.CenterEnd)
-                            )
-                        }
+//                        if (isPC) {
+//                            Text(
+//                                text = "PC",
+//                                color = MaterialTheme.colorScheme.primary,
+//                                style = MaterialTheme.typography.labelSmall,
+//                                modifier = Modifier.align(Alignment.CenterEnd)
+//                            )
+//                        }
                     }
                 }
 
                 // Address (if name is provided)
                 if (name != null && address != null) {
                     Text(
-                        text = "(${address.toString().padStart(2, '0')})",
-                        modifier = Modifier.padding(horizontal = 8.dp),
+                        text = "@${address.toString().padStart(2, '0')}",
+                        modifier = Modifier.padding(horizontal = 16.dp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }

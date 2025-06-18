@@ -61,7 +61,7 @@ fun IoControlsPanel(viewModel: SimulatorViewModel, modifier: Modifier = Modifier
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
 
-            ControlRow(viewModel, modifier)
+
 
 
             // Output log

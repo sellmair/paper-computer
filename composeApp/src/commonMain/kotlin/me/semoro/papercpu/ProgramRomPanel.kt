@@ -29,10 +29,12 @@ fun ProgramRomPanel(viewModel: SimulatorViewModel,
                 .fillMaxSize()
         ) {
             Text(
-                text = "Program ROM (50-99)",
+                text = "Program ROM (@50-@99)",
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
+
+            ControlRow(viewModel)
 
             // Program ROM editor
             LazyColumn(
@@ -69,8 +71,8 @@ fun ProgramRomPanel(viewModel: SimulatorViewModel,
                         additionalContent = {
                             // Decode preview
                             Text(
-                                text = "$src → $dst",
-                                modifier = Modifier.padding(start = 8.dp),
+                                text = "@${src.toString().padStart(2, '0')} → @${dst.toString().padStart(2, '0')}",
+                                modifier = Modifier.padding(start = 25.dp),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -81,4 +83,3 @@ fun ProgramRomPanel(viewModel: SimulatorViewModel,
         }
     }
 }
-

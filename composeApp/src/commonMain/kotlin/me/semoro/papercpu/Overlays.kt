@@ -18,6 +18,8 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.math.PI
 import kotlin.math.cos
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.sin
 
 @Composable
@@ -110,13 +112,13 @@ fun PCOverlay(
 
 
         val textBlockRect = Rect(
-            rect.topLeft + Offset(- cornerRadius - textWidth, 0f),
-            rect.bottomLeft
+            rect.topRight + Offset(0f, 0f),
+            rect.topRight + Offset(cornerRadius + textWidth, rect.height)
         )
 
         val newRect = Rect(
-            textBlockRect.topLeft,
-            rect.bottomRight
+            rect.topLeft,
+            textBlockRect.bottomRight
         )
 
 
@@ -137,14 +139,14 @@ fun PCOverlay(
             alpha = opacity
         )
 
-        // Position the text vertically centered on the left side of the rectangle
+        // Position the text vertically centered on the right side of the rectangle
         drawText(
             textMeasurer = measurer,
             text = "PC",
             style = TextStyle(color = textColor),
             topLeft = Offset(
-                rect.left - cornerRadius / 2 - textWidth,
-                rect.top + (rect.height - textHeight) / 2
+                min(rect.right + cornerRadius / 2, size.width - textWidth),
+                max(rect.top + (rect.height - textHeight) / 2, 0f)
             )
         )
     }

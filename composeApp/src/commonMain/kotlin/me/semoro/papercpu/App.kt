@@ -19,53 +19,39 @@ fun App() {
 
     MaterialTheme {
         Box(Modifier.fillMaxSize()) {
-            Column(
+            Row(
                 modifier = Modifier
                     .safeContentPadding()
                     .fillMaxSize()
-                    .padding(16.dp),
+                    .padding(16.dp)
             ) {
-                // Top row: Registers and Memory Grid
-                Row(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    // Registers panel
-                    RegistersPanel(
-                        viewModel = viewModel,
-                        modifier = Modifier.weight(0.4f)
-                    )
 
-                    // Memory grid
-                    MemoryGrid(
-                        viewModel = viewModel,
-                        modifier = Modifier.weight(0.6f)
-                    )
-                }
+                RegistersPanel(
+                    viewModel = viewModel,
+                    modifier = Modifier.weight(0.5f)
+                )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.width(16.dp))
+                // Memory grid
+                MemoryGrid(
+                    viewModel = viewModel,
+                    modifier = Modifier.weight(0.5f)
+                )
+                Spacer(modifier = Modifier.width(16.dp))
 
-                // Bottom row: Program ROM and I/O + Controls
-                Row(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    // Program ROM panel
-                    ProgramRomPanel(
-                        viewModel = viewModel,
-                        modifier = Modifier.weight(0.5f)
-                    )
 
-                    // I/O and Controls panel
-                    IoControlsPanel(
-                        viewModel = viewModel,
-                        modifier = Modifier.weight(0.5f)
-                    )
-                }
+                // Program ROM panel
+                ProgramRomPanel(
+                    viewModel = viewModel,
+                    modifier = Modifier.weight(0.5f)
+                )
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                IoControlsPanel(
+                    viewModel = viewModel,
+                    modifier = Modifier.weight(0.5f)
+                )
             }
 //            // Draw arrow overlay if both read and write pointers are set
 //            if (readPointer != null && writePointer != null &&

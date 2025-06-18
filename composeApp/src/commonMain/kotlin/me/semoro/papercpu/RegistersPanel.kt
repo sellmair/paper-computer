@@ -194,10 +194,10 @@ fun RegistersPanel(viewModel: SimulatorViewModel, modifier: Modifier = Modifier.
                         text = "Current Instruction",
                         style = MaterialTheme.typography.titleMedium
                     )
-                    Text("PC: ${pc.toString().padStart(2, '0')}")
+                    Text("PC: @${pc.toString().padStart(2, '0')}")
                     Text("Instruction: ${instr.toString().padStart(4, '0')}")
                     Text(
-                        "Source: ${src.toString().padStart(2, '0')} → Destination: ${
+                        "Source: @${src.toString().padStart(2, '0')} → Destination: @${
                             dst.toString().padStart(2, '0')
                         }"
                     )
