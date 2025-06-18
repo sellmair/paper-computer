@@ -12,7 +12,7 @@ data class InsnDec(
     val w: Int
 )
 
-data class ProgramData constructor(
+data class ProgramData(
     val packed: ShortArray
 ) {
     override fun equals(other: Any?): Boolean {
@@ -303,13 +303,13 @@ class Simulator {
             newMemory[address] = value
 
             // Recompute derived registers if necessary
-            if (address in 2..3 || address == 8) {
-                recomputeDerivedRegisters(newMemory)
-            }
+            recomputeDerivedRegisters(newMemory)
 
             _memory.value = newMemory
+        }
 
-            historyBuffer.clear() // Clear history on manual edit
+        if (address in 50..99) {
+            historyBuffer.clear() // Clear history on program edit
             _historyEmpty.value = historyBuffer.isEmpty()
         }
     }
