@@ -10,6 +10,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material.icons.rounded.Pause
+import androidx.compose.material.icons.rounded.SkipNext
+import androidx.compose.material.icons.rounded.SkipPrevious
+import androidx.compose.material.icons.rounded.Refresh
+import kotlinx.coroutines.flow.StateFlow
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun IoControlsPanel(viewModel: SimulatorViewModel, modifier: Modifier = Modifier) {
@@ -53,7 +61,7 @@ fun IoControlsPanel(viewModel: SimulatorViewModel, modifier: Modifier = Modifier
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
 
-            ControlRow(isRunning, viewModel, modifier)
+            ControlRow(viewModel, modifier)
 
 
             // Output log
@@ -100,13 +108,23 @@ fun IoControlsPanel(viewModel: SimulatorViewModel, modifier: Modifier = Modifier
     }
 }
 
+
+
+interface SimulationControlViewModel {
+    val isRunning: StateFlow<Boolean>
+    fun step()
+    fun stepBack(): Boolean
+    fun toggleRun()
+    fun reset()
+}
+
 @Composable
-private fun ControlRow(
-    isRunning: Boolean,
-    viewModel: SimulatorViewModel,
+fun ControlRow(
+    viewModel: SimulationControlViewModel,
     modifier: Modifier = Modifier
 ) {
-    // Controls - all buttons in a single row
+
+    val isRunning by viewModel.isRunning.collectAsState()
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -118,21 +136,24 @@ private fun ControlRow(
             enabled = !isRunning,
             modifier = Modifier.weight(1f)
         ) {
-            Text("|<")
+            Icon(Icons.Rounded.SkipPrevious, contentDescription = "Step Back")
         }
 
         IconButton(
             onClick = { viewModel.step() },
             modifier = Modifier.weight(1f)
         ) {
-           Text(">|")
+            Icon(Icons.Rounded.SkipNext, contentDescription = "Step Forward")
         }
 
         IconButton(
             onClick = { viewModel.toggleRun() },
             modifier = Modifier.weight(1f)
         ) {
-            Text(if (isRunning) "⏸️" else "▶️")
+            Icon(
+                if (isRunning) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
+                contentDescription = if (isRunning) "Pause" else "Play"
+            )
         }
 
         IconButton(
@@ -140,7 +161,26 @@ private fun ControlRow(
             enabled = !isRunning,
             modifier = Modifier.weight(1f)
         ) {
-            Text("🔄")
+            Icon(Icons.Rounded.Refresh, contentDescription = "Reset")
         }
+    }
+}
+
+@Composable
+@Preview
+fun ControlRowPreview() {
+    MaterialTheme {
+        val previewViewModel = object : SimulationControlViewModel {
+            override val isRunning = kotlinx.coroutines.flow.MutableStateFlow(false)
+            override fun step() {}
+            override fun stepBack(): Boolean = true
+            override fun toggleRun() {}
+            override fun reset() {}
+        }
+
+        ControlRow(
+            viewModel = previewViewModel,
+            modifier = Modifier.padding(16.dp)
+        )
     }
 }

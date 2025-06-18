@@ -27,11 +27,13 @@ interface ValueCellNodePositionContainer {
     val cellUiNodePosition: SnapshotStateMap<Int, CellNodePositions>
 }
 
+
+
 /**
  * ViewModel for the MOV-Only Architecture Simulator.
  * Bridges the core simulation logic with the UI.
  */
-class SimulatorViewModel: ValueCellNodePositionContainer {
+class SimulatorViewModel: ValueCellNodePositionContainer, SimulationControlViewModel {
     private val simulator = Simulator()
     private val coroutineScope = CoroutineScope(Dispatchers.Default)
     private var runJob: Job? = null
@@ -45,7 +47,7 @@ class SimulatorViewModel: ValueCellNodePositionContainer {
 
     // Simulation state
     private val _isRunning = MutableStateFlow(false)
-    val isRunning: StateFlow<Boolean> = _isRunning.asStateFlow()
+    override val isRunning: StateFlow<Boolean> = _isRunning.asStateFlow()
 
     private val _outputLog = MutableStateFlow<List<Int>>(emptyList())
     val outputLog: StateFlow<List<Int>> = _outputLog.asStateFlow()
@@ -68,7 +70,7 @@ class SimulatorViewModel: ValueCellNodePositionContainer {
     /**
      * Executes a single step of the simulation and saves the program.
      */
-    fun step() {
+    override fun step() {
         simulator.step()
         checkOutputChange()
 
@@ -80,7 +82,7 @@ class SimulatorViewModel: ValueCellNodePositionContainer {
      * Steps back to the previous state and saves the program.
      * @return true if step back was successful, false if history is empty
      */
-    fun stepBack(): Boolean {
+    override fun stepBack(): Boolean {
         val result = simulator.stepBack()
 
         // Save the program after step back (only if successful)
@@ -94,7 +96,7 @@ class SimulatorViewModel: ValueCellNodePositionContainer {
     /**
      * Starts or stops the automatic execution of the simulation.
      */
-    fun toggleRun() {
+    override fun toggleRun() {
         if (_isRunning.value) {
             stopRun()
         } else {
@@ -155,7 +157,7 @@ class SimulatorViewModel: ValueCellNodePositionContainer {
     /**
      * Resets the simulator to its initial state and saves the program.
      */
-    fun reset() {
+    override fun reset() {
         stopRun()
         simulator.reset()
         _outputLog.value = emptyList()
