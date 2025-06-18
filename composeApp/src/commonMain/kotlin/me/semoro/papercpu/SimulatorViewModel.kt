@@ -311,4 +311,12 @@ class SimulatorViewModel: ValueCellNodePositionContainer, SimulationControlViewM
         return storage.getSavedProgramNames()
     }
 
+    /**
+     * Deletes a program with a specific name.
+     * @param name The name of the program to delete
+     */
+    suspend fun deleteProgram(name: String) {
+        storage.deleteProgram(name)
+    }
+
 }

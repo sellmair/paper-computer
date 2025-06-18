@@ -35,6 +35,11 @@ interface Storage {
      */
     suspend fun loadProgramByName(name: String): ProgramData?
 
+    /**
+     * Deletes a program from local storage.
+     * @param name can contain any characters
+     */
+    suspend fun deleteProgram(name: String)
 
     suspend fun getSavedProgramNames(): List<String>
 }
@@ -168,6 +173,21 @@ object CommonStorage: Storage {
 
     override suspend fun getSavedProgramNames(): List<String> {
         return getProgramList()
+    }
+
+    override suspend fun deleteProgram(name: String) {
+        // Remove from program list
+        val programList = getProgramList()
+        if (programList.contains(name)) {
+            programList.remove(name)
+            saveProgramList(programList)
+        }
+
+        // Delete program data
+        val encodedName = encodeKey(name)
+        withContext(Dispatchers.Default) {
+            PlatformStorageProvider.setValue("program_$encodedName", null)
+        }
     }
 }
 

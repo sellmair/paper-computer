@@ -20,8 +20,11 @@ import androidx.compose.material.icons.rounded.SkipPrevious
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.FolderOpen
+import androidx.compose.material.icons.filled.Delete
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.compose.runtime.rememberCoroutineScope
 
 @Composable
 fun IoControlsPanel(viewModel: SimulatorViewModel, modifier: Modifier = Modifier) {
@@ -153,6 +156,7 @@ fun ControlRow(
 ) {
     val isRunning by viewModel.isRunning.collectAsState()
     val isHalted by viewModel.isHalted.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
 
     // Check if viewModel is SimulatorViewModel to enable save/load functionality
     val simulatorViewModel = viewModel as? SimulatorViewModel
@@ -225,16 +229,41 @@ fun ControlRow(
                                         .fillMaxWidth()
                                         .padding(vertical = 4.dp)
                                         .clickable { selectedProgram = name },
-                                    verticalAlignment = Alignment.CenterVertically
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    RadioButton(
-                                        selected = selectedProgram == name,
-                                        onClick = { selectedProgram = name }
-                                    )
-                                    Text(
-                                        text = name,
-                                        modifier = Modifier.padding(start = 8.dp)
-                                    )
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        RadioButton(
+                                            selected = selectedProgram == name,
+                                            onClick = { selectedProgram = name }
+                                        )
+                                        Text(
+                                            text = name,
+                                            modifier = Modifier.padding(start = 8.dp)
+                                        )
+                                    }
+                                    IconButton(
+                                        onClick = {
+                                            // Refresh the list after deletion
+                                            coroutineScope.launch {
+                                                simulatorViewModel.deleteProgram(name)
+
+                                                savedPrograms = simulatorViewModel.getSavedProgramNames()
+                                                // Clear selection if the selected program was deleted
+                                                if (selectedProgram == name) {
+                                                    selectedProgram = null
+                                                }
+                                            }
+                                        }
+                                    ) {
+                                        Icon(
+                                            Icons.Filled.Delete,
+                                            contentDescription = "Delete Program",
+                                            tint = MaterialTheme.colorScheme.error
+                                        )
+                                    }
                                 }
                             }
                         }
