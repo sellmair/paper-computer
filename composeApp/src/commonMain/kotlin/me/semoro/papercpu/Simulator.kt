@@ -260,7 +260,7 @@ class Simulator {
     fun getProgramData(): ProgramData {
         return ProgramData(
             _memory.value.sliceArray(50..99).map {
-                require(it > 0 && it < 9999)
+                require(it >= 0 && it < 9999)
                 it.toShort()
             }.toShortArray()
         )

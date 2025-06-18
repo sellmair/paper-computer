@@ -13,11 +13,16 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         // Initialize the storage
-        AndroidStorageHolder.storage = AndroidStorage(applicationContext)
+        PlatformStorageProvider.storage = AndroidStorage(applicationContext)
 
         setContent {
             App()
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        PlatformStorageProvider.storage = null
     }
 }
 
