@@ -55,6 +55,13 @@ fun ProgramRomPanel(viewModel: SimulatorViewModel,
                                                 viewModel.updateMemory(address, newValue)
                                             }
                                         },
+                        onChangeEditState = { bool ->
+                            if (bool) {
+                                viewModel.setEditingActive(address)
+                            } else {
+                                viewModel.setEditingActive(null)
+                            }
+                        },
                         layout = ValueCardLayout.ROW,
                         isEditable = true,
                         modifier = Modifier,

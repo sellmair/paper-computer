@@ -1,5 +1,7 @@
 package me.semoro.papercpu
 
+import androidx.compose.animation.core.animateOffsetAsState
+import androidx.compose.animation.core.animateRectAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -69,30 +71,57 @@ fun App() {
 //                readPointer != writePointer &&
 //                cellPositions.containsKey(readPointer) &&
 //                cellPositions.containsKey(writePointer)) {
+
+            val editingPos by viewModel.editingCellAddress.collectAsState()
             val rp = viewModel.readPointer.collectAsState()
             val wp = viewModel.writePointer.collectAsState()
             val pcp by viewModel.pcPointer.collectAsState()
 
             val cellPositions = viewModel.cellUiNodePosition
 
-            // Draw arrow overlay between read and write pointers
-            if (cellPositions.containsKey(rp.value) && cellPositions.containsKey(wp.value)) {
-                ArrowOverlay(
-                    startPosition = cellPositions[rp.value]!!.readNodeOffset,
-                    endPosition = cellPositions[wp.value]!!.writeNodeOffset,
-                    arrowColor = Color.Blue.copy(alpha = 0.7f),
-                    arrowWidth = 5f,
-                    arrowHeadSize = 20f
-                )
-            }
+            if (editingPos == null) {
+                // Draw arrow overlay between read and write pointers
+                if (cellPositions.containsKey(rp.value) && cellPositions.containsKey(wp.value)) {
 
-            // Draw box overlay around the PC
-            if (cellPositions.containsKey(pcp)) {
-                BoxOverlay(
-                    rect = cellPositions[pcp]!!.pcNodeRect,
-                    boxColor = Color.Blue.copy(alpha = 0.7f),
-                    boxStrokeWidth = 5f
-                )
+                    val from = animateOffsetAsState(cellPositions[rp.value]!!.readNodeOffset)
+                    val to = animateOffsetAsState(cellPositions[wp.value]!!.writeNodeOffset)
+
+                    ArrowOverlay(
+                        startPosition = from.value,
+                        endPosition = to.value,
+                        arrowColor = Color.Blue.copy(alpha = 0.7f),
+                        arrowWidth = 5f,
+                        arrowHeadSize = 20f
+                    )
+                }
+
+
+                // Draw box overlay around the PC
+                if (cellPositions.containsKey(pcp)) {
+                    val targetRect = animateRectAsState(cellPositions[pcp]!!.pcNodeRect)
+
+                    PCOverlay(
+                        rect = targetRect.value
+                    )
+                }
+            } else {
+
+                val memory by viewModel.memory.collectAsState()
+                val (rpx, wpx) = decodeInstruction(memory[editingPos!!])
+
+                if (cellPositions.containsKey(rpx) && cellPositions.containsKey(wpx)) {
+                    editingPos
+                    val from = animateOffsetAsState(cellPositions[rpx]!!.readNodeOffset)
+                    val to = animateOffsetAsState(cellPositions[wpx]!!.writeNodeOffset)
+
+                    ArrowOverlay(
+                        startPosition = from.value,
+                        endPosition = to.value,
+                        arrowColor = Color.Gray.copy(alpha = 0.7f),
+                        arrowWidth = 5f,
+                        arrowHeadSize = 20f
+                    )
+                }
             }
 //            }
         }

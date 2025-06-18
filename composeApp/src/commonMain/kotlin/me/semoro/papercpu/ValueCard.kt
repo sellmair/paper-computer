@@ -9,6 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
@@ -93,6 +94,7 @@ fun ValueCard(
     isWrittenTo: Boolean = false,
     isRunning: Boolean = false,
     onValueChange: ((Int) -> Unit)? = null,
+    onChangeEditState: ((Boolean) -> Unit)? = null,
 
     // Identifier properties
     address: Int? = null,
@@ -290,6 +292,10 @@ fun ValueCard(
                             },
                             modifier = Modifier.fillMaxWidth().onGloballyPositioned { coordinates ->
                                 setCellNodePositions(coordinates, valueCellNodePositionContainer!!, address!!)
+                            }.onFocusEvent { evt ->
+                                if (onChangeEditState != null) {
+                                    onChangeEditState(evt.hasFocus)
+                                }
                             },
                             enabled = !isRunning,
                             singleLine = true,
@@ -297,7 +303,8 @@ fun ValueCard(
                             textStyle = MaterialTheme.typography.bodyMedium,
                             colors = OutlinedTextFieldDefaults.colors(
                                 unfocusedTextColor = valueColor
-                            )
+                            ),
+
                         )
                     } else {
                         ValueCardInner(value, address, Modifier.align(Alignment.Center), valueCellNodePositionContainer)

@@ -45,6 +45,14 @@ class SimulatorViewModel: ValueCellNodePositionContainer, SimulationControlViewM
     val writePointer = simulator.writePointer
     val pcPointer = simulator.pcPointer
 
+
+    private val _editingCellAddress = MutableStateFlow<Int?>(null)
+    val editingCellAddress = _editingCellAddress.asStateFlow()
+
+    fun setEditingActive(cellAddress: Int?) {
+        _editingCellAddress.value = cellAddress
+    }
+
     // Simulation state
     private val _isRunning = MutableStateFlow(false)
     override val isRunning: StateFlow<Boolean> = _isRunning.asStateFlow()

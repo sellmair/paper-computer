@@ -3,7 +3,20 @@ package me.semoro.papercpu
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+
+
+data class InsnDec(
+    val r: Int,
+    val w: Int
+)
+
+
+fun decodeInstruction(value: Int): InsnDec {
+    val src = value / 100 // high two digits
+    val dst = value % 100 // low two digits
+
+    return InsnDec(src, dst)
+}
 
 /**
  * Core simulation logic for the MOV-Only Architecture Simulator.
@@ -29,7 +42,33 @@ class Simulator {
 
     init {
         resetMemory()
-        _pcPointer.value = _memory.value[PC]
+        decodeCurrentInstructionAndUpdatePointers()
+    }
+
+    fun decodeCurrentInstructionAndUpdatePointers() {
+        val memory = _memory.value
+        val pcp = memory[PC]
+
+        _pcPointer.value = pcp
+
+        val instr = memory[pcp]
+
+        // Phase 1: Decode instruction
+        if (instr == 0) {
+            // HALT instruction, do nothing
+            _readPointer.value = null
+            _writePointer.value = null
+            return
+        }
+
+        val src = instr / 100 // high two digits
+        val dst = instr % 100 // low two digits
+
+        // Phase 2: Place read pointer
+        _readPointer.value = src
+
+        // Phase 3: Place write pointer
+        _writePointer.value = dst
     }
 
     /**
@@ -52,17 +91,10 @@ class Simulator {
             return
         }
 
-        val src = instr / 100 // high two digits
-        val dst = instr % 100 // low two digits
+        val (src, dst) = decodeInstruction(instr)
 
         // Save history before making changes
         pushHistory(pcBefore, src, dst, currentMemory)
-
-        // Phase 2: Place read pointer
-        _readPointer.value = src
-
-        // Phase 3: Place write pointer
-        _writePointer.value = dst
 
         // Phase 4: Copy value
         val newMemory = currentMemory.copyOf()
@@ -70,14 +102,15 @@ class Simulator {
 
         // Phase 5: Move PC to +1 address
         val newPc = (newMemory[1] + 1) % 100
-        newMemory[1] = newPc
-        _pcPointer.value = newPc
+        newMemory[PC] = newPc
 
         // Update derived registers (cells 04-07)
         recomputeDerivedRegisters(newMemory)
 
         // Update memory
         _memory.value = newMemory
+
+        decodeCurrentInstructionAndUpdatePointers()
     }
 
     /**
@@ -140,13 +173,10 @@ class Simulator {
         // Recompute derived registers
         recomputeDerivedRegisters(currentMemory)
 
-        // Clear pointers
-        _readPointer.value = null
-        _writePointer.value = null
-        _pcPointer.value = entry.pcBefore
 
-        // Update memory
         _memory.value = currentMemory
+        // Clear pointers
+        decodeCurrentInstructionAndUpdatePointers()
 
         return true
     }
@@ -181,6 +211,8 @@ class Simulator {
         newMemory[55] = 1
 
         _memory.value = newMemory
+
+        decodeCurrentInstructionAndUpdatePointers()
     }
 
     /**
@@ -188,8 +220,6 @@ class Simulator {
      */
     fun reset() {
         resetMemory()
-        _readPointer.value = null
-        _writePointer.value = null
         historyBuffer.clear()
     }
 
