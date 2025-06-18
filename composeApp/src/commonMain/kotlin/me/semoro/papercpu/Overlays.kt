@@ -96,6 +96,7 @@ fun PCOverlay(
     rect: Rect,
     boxColor: Color = Color(0xFF6495ED), // Cornflower blue to match the screenshot
     textColor: Color = Color.White,
+    opacity: Float = 1f,
     cornerRadius: Float = 20f
 ) {
     val measurer = rememberTextMeasurer()
@@ -125,13 +126,15 @@ fun PCOverlay(
             topLeft = newRect.topLeft,
             size = newRect.size,
             cornerRadius = CornerRadius(cornerRadius, cornerRadius),
-            style = Stroke(width = 10f)
+            style = Stroke(width = 10f),
+            alpha = opacity
         )
         drawRoundRect(
             boxColor,
             topLeft = textBlockRect.topLeft,
             size = textBlockRect.size,
             cornerRadius = CornerRadius(cornerRadius, cornerRadius),
+            alpha = opacity
         )
 
         // Position the text vertically centered on the left side of the rectangle

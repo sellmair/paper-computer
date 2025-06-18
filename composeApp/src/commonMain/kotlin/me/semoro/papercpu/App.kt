@@ -1,5 +1,6 @@
 package me.semoro.papercpu
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateOffsetAsState
 import androidx.compose.animation.core.animateRectAsState
 import androidx.compose.foundation.layout.*
@@ -79,6 +80,20 @@ fun App() {
 
             val cellPositions = viewModel.cellUiNodePosition
 
+
+            // Draw box overlay around the PC
+            if (cellPositions.containsKey(pcp)) {
+                val targetRect = animateRectAsState(cellPositions[pcp]!!.pcNodeRect)
+
+                val targetOpacity by animateFloatAsState(
+                    if (editingPos == null) 1f else 0.3f
+                )
+                PCOverlay(
+                    rect = targetRect.value,
+                    opacity = targetOpacity
+                )
+            }
+
             if (editingPos == null) {
                 // Draw arrow overlay between read and write pointers
                 if (cellPositions.containsKey(rp.value) && cellPositions.containsKey(wp.value)) {
@@ -92,16 +107,6 @@ fun App() {
                         arrowColor = Color.Blue.copy(alpha = 0.7f),
                         arrowWidth = 5f,
                         arrowHeadSize = 20f
-                    )
-                }
-
-
-                // Draw box overlay around the PC
-                if (cellPositions.containsKey(pcp)) {
-                    val targetRect = animateRectAsState(cellPositions[pcp]!!.pcNodeRect)
-
-                    PCOverlay(
-                        rect = targetRect.value
                     )
                 }
             } else {
