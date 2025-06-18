@@ -23,8 +23,10 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 fun IoControlsPanel(viewModel: SimulatorViewModel, modifier: Modifier = Modifier) {
 
-    val isRunning by viewModel.isRunning.collectAsState()
+    val isHalted by viewModel.isHalted.collectAsState()
     val outputLog by viewModel.outputLog.collectAsState()
+
+    val isWaitingForInput = viewModel.readPointer.collectAsState().value == Simulator.INP
 
     Card(
         modifier = modifier.fillMaxHeight(),
@@ -59,18 +61,38 @@ fun IoControlsPanel(viewModel: SimulatorViewModel, modifier: Modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
                 singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = if (isWaitingForInput) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
+                    unfocusedBorderColor = if (isWaitingForInput) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
+                    focusedContainerColor = if (isWaitingForInput) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = if (isWaitingForInput) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface
+                )
             )
 
 
 
 
             // Output log
-            Text(
-                text = "Output Log:",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Output Log:",
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+                if (isHalted) {
+                    Text(
+                        text = "Program halted",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
 
             Card(
                 modifier = Modifier
@@ -113,6 +135,7 @@ fun IoControlsPanel(viewModel: SimulatorViewModel, modifier: Modifier = Modifier
 
 interface SimulationControlViewModel {
     val isRunning: StateFlow<Boolean>
+    val isHalted: StateFlow<Boolean>
     fun step()
     fun stepBack(): Boolean
     fun toggleRun()
@@ -128,6 +151,7 @@ fun ControlRow(
 ) {
 
     val isRunning by viewModel.isRunning.collectAsState()
+    val isHalted by viewModel.isHalted.collectAsState()
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -146,7 +170,11 @@ fun ControlRow(
             onClick = { viewModel.step() },
             modifier = Modifier.weight(1f)
         ) {
-            Icon(Icons.Rounded.SkipNext, contentDescription = "Step Forward")
+            Icon(
+                Icons.Rounded.SkipNext, 
+                contentDescription = "Step Forward",
+                tint = if (isHalted) MaterialTheme.colorScheme.error else LocalContentColor.current
+            )
         }
 
         IconButton(
@@ -155,7 +183,8 @@ fun ControlRow(
         ) {
             Icon(
                 if (isRunning) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
-                contentDescription = if (isRunning) "Pause" else "Play"
+                contentDescription = if (isRunning) "Pause" else "Play",
+                tint = if (isHalted && !isRunning) MaterialTheme.colorScheme.error else LocalContentColor.current
             )
         }
 
@@ -183,6 +212,7 @@ fun ControlRowPreview() {
     MaterialTheme {
         val previewViewModel = object : SimulationControlViewModel {
             override val isRunning = kotlinx.coroutines.flow.MutableStateFlow(false)
+            override val isHalted = kotlinx.coroutines.flow.MutableStateFlow(false)
             override fun step() {}
             override fun stepBack(): Boolean = true
             override fun toggleRun() {}

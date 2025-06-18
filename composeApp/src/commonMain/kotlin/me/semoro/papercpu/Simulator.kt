@@ -1,5 +1,6 @@
 package me.semoro.papercpu
 
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -36,6 +37,9 @@ class Simulator {
 
     private val _pcPointer = MutableStateFlow<Int?>(null)
     val pcPointer: StateFlow<Int?> = _pcPointer.asStateFlow()
+
+    val output = MutableSharedFlow<Int?>(replay = 1)
+
 
     // History buffer for step-back debugging
     private val historyBuffer = ArrayDeque<HistoryEntry>(100) // Fixed size of 100 entries
@@ -99,7 +103,12 @@ class Simulator {
 
         // Phase 4: Copy value
         val newMemory = currentMemory.copyOf()
-        newMemory[dst] = currentMemory[src]
+        val value = currentMemory[src]
+        newMemory[dst] = value
+
+        if (dst == OUT) {
+            output.tryEmit(value)
+        }
 
         // Phase 5: Move PC to +1 address
         val newPc = (newMemory[1] + 1) % 100
@@ -179,6 +188,8 @@ class Simulator {
         // Clear pointers
         decodeCurrentInstructionAndUpdatePointers()
 
+        output.tryEmit(null)
+
         return true
     }
 
@@ -202,6 +213,8 @@ class Simulator {
         _memory.value = newMemory
 
         decodeCurrentInstructionAndUpdatePointers()
+
+        output.tryEmit(null)
     }
 
     fun resetProgram() {

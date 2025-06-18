@@ -11,6 +11,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
@@ -57,13 +58,14 @@ class SimulatorViewModel: ValueCellNodePositionContainer, SimulationControlViewM
     private val _isRunning = MutableStateFlow(false)
     override val isRunning: StateFlow<Boolean> = _isRunning.asStateFlow()
 
+    private val _isHalted = MutableStateFlow(false)
+    override val isHalted: StateFlow<Boolean> = _isHalted.asStateFlow()
+
     private val _outputLog = MutableStateFlow<List<Int>>(emptyList())
     val outputLog: StateFlow<List<Int>> = _outputLog.asStateFlow()
 
     override val cellUiNodePosition = mutableStateMapOf<Int, CellNodePositions>()
 
-    // Last output value for change detection
-    private var lastOutputValue: Int = 0
 
     init {
         // Try to load saved program
@@ -73,14 +75,29 @@ class SimulatorViewModel: ValueCellNodePositionContainer, SimulationControlViewM
                 simulator.updateMemoryArray(savedMemory)
             }
         }
+        coroutineScope.launch {
+            simulator.output.filterNotNull().collect {
+                println("Collect: $it")
+                val prev = _outputLog.value
+                _outputLog.value = prev + it
+            }
+        }
     }
 
     /**
      * Executes a single step of the simulation and saves the program.
      */
     override fun step() {
+        _isHalted.value = false
+
+        val pc = memory.value[Simulator.PC]
+        val instr = memory.value[pc]
+        if (instr == 0) {
+            // HALT instruction, stop running
+            _isHalted.value = true
+            return
+        }
         simulator.step()
-        checkOutputChange()
 
         // Save the program after step
         saveProgram()
@@ -91,6 +108,7 @@ class SimulatorViewModel: ValueCellNodePositionContainer, SimulationControlViewM
      * @return true if step back was successful, false if history is empty
      */
     override fun stepBack(): Boolean {
+        _isHalted.value = false
         val result = simulator.stepBack()
 
         // Save the program after step back (only if successful)
@@ -120,26 +138,26 @@ class SimulatorViewModel: ValueCellNodePositionContainer, SimulationControlViewM
 
         runJob = coroutineScope.launch {
             _isRunning.value = true
-            var stepCount = 0
 
             while (isActive) {
-                val pc = memory.value[1]
+                val pc = memory.value[Simulator.PC]
                 val instr = memory.value[pc]
 
                 if (instr == 0) {
                     // HALT instruction, stop running
+                    _isHalted.value = true
+                    stopRun()
+                    break
+                }
+
+                val (src, dst) = decodeInstruction(instr)
+
+                if (src == Simulator.INP) {
                     stopRun()
                     break
                 }
 
                 simulator.step()
-                checkOutputChange()
-
-                // Save the program periodically (every 5 steps)
-                stepCount++
-                if (stepCount % 5 == 0) {
-                    saveProgram()
-                }
 
                 // Limit execution speed to avoid UI freezing
                 delay(100) // 10 steps per second, can be adjusted
@@ -169,13 +187,14 @@ class SimulatorViewModel: ValueCellNodePositionContainer, SimulationControlViewM
         stopRun()
         simulator.reset()
         _outputLog.value = emptyList()
-        lastOutputValue = 0
+        _isHalted.value = false
 
         // Save the program after reset
         saveProgram()
     }
 
     override fun clearProgram() {
+        reset()
         simulator.resetProgram()
     }
 
@@ -199,14 +218,4 @@ class SimulatorViewModel: ValueCellNodePositionContainer, SimulationControlViewM
         }
     }
 
-    /**
-     * Checks if the output value (memory[11]) has changed and updates the output log.
-     */
-    private fun checkOutputChange() {
-        val currentOutput = memory.value[11]
-        if (currentOutput != lastOutputValue) {
-            _outputLog.value = _outputLog.value + currentOutput
-            lastOutputValue = currentOutput
-        }
-    }
 }
