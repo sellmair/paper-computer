@@ -16,6 +16,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.format
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 
 data class CellNodePositions(
@@ -101,7 +107,8 @@ class SimulatorViewModel: ValueCellNodePositionContainer, SimulationControlViewM
         coroutineScope.launch {
             val savedMemory = storage.loadProgram()
             if (savedMemory != null) {
-                simulator.updateMemoryArray(savedMemory)
+                simulator.updateProgramData(savedMemory)
+                simulator.reset()
             }
         }
         coroutineScope.launch {
@@ -226,9 +233,16 @@ class SimulatorViewModel: ValueCellNodePositionContainer, SimulationControlViewM
 
     /**
      * Resets the simulator to its initial state and saves the program.
+     * Also saves the state before resetting as "before_reset_<counter>"
      */
+    @OptIn(ExperimentalTime::class)
     override fun reset() {
         stopRun()
+
+        val td = kotlinx.datetime.Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+        // Save the state before resetting
+        saveProgramAs("before_reset_${td}")
+
         simulator.reset()
         _outputLog.value = emptyList()
         _isHalted.value = false
@@ -258,8 +272,40 @@ class SimulatorViewModel: ValueCellNodePositionContainer, SimulationControlViewM
      */
     private fun saveProgram() {
         coroutineScope.launch {
-            storage.saveProgram(memory.value)
+            storage.saveProgram(simulator.getProgramData())
         }
+    }
+
+    /**
+     * Saves the current program with a specific name.
+     * @param name The name to save the program under
+     */
+    fun saveProgramAs(name: String) {
+        coroutineScope.launch {
+            storage.saveProgramAs(name, simulator.getProgramData())
+        }
+    }
+
+    /**
+     * Loads a program with a specific name.
+     * @param name The name of the program to load
+     */
+    fun loadProgramByName(name: String) {
+        coroutineScope.launch {
+            val savedMemory = storage.loadProgramByName(name)
+            if (savedMemory != null) {
+                simulator.updateProgramData(savedMemory)
+                simulator.reset()
+            }
+        }
+    }
+
+    /**
+     * Gets a list of all saved program names.
+     * @return A list of saved program names
+     */
+    suspend fun getSavedProgramNames(): List<String> {
+        return storage.getSavedProgramNames()
     }
 
 }

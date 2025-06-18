@@ -1,24 +1,37 @@
 package me.semoro.papercpu
 
 /**
- * Interface for platform-specific storage implementations.
+ * Interface for storage implementations.
  * Used to save and load the program state.
  */
 interface Storage {
     /**
      * Saves the program memory to local storage.
-     * @param memory The memory array to save
      */
-    suspend fun saveProgram(memory: IntArray)
+    suspend fun saveProgram(memory: ProgramData)
 
     /**
      * Loads the program memory from local storage.
-     * @return The loaded memory array, or null if no saved program exists
+     * @return The loaded program, or null if no saved program exists
+     *
      */
-    suspend fun loadProgram(): IntArray?
+    suspend fun loadProgram(): ProgramData?
+
+    suspend fun saveProgramAs(name: String, programData: ProgramData)
+
+    /**
+     * Loads the program memory from local storage.
+     * @return The loaded program, or null if no saved program with such name exists
+     *
+     */
+    suspend fun loadProgramByName(name: String): ProgramData?
+
+
+    suspend fun getSavedProgramNames(): List<String>
+
+
 }
 
-/**
- * Expect function to get the platform-specific storage implementation.
- */
-expect fun getStorage(): Storage
+fun getStorage(): Storage {
+    TODO()
+}

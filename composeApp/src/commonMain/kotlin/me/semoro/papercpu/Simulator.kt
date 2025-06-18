@@ -11,6 +11,25 @@ data class InsnDec(
     val w: Int
 )
 
+data class ProgramData constructor(
+    val packed: ShortArray
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as ProgramData
+
+        if (!packed.contentEquals(other.packed)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return packed.contentHashCode()
+    }
+}
+
 
 fun decodeInstruction(value: Int): InsnDec {
     val src = value / 100 // high two digits
@@ -234,6 +253,24 @@ class Simulator {
         newMemory[54] = 311
         newMemory[55] = 1
 
+        _memory.value = newMemory
+    }
+
+
+    fun getProgramData(): ProgramData {
+        return ProgramData(
+            _memory.value.sliceArray(50..99).map {
+                require(it > 0 && it < 9999)
+                it.toShort()
+            }.toShortArray()
+        )
+    }
+
+    fun updateProgramData(programData: ProgramData) {
+        val newMemory = _memory.value.copyOf()
+        for (i in 50..99) {
+            newMemory[i] = programData.packed[i - 50].toInt()
+        }
         _memory.value = newMemory
     }
 

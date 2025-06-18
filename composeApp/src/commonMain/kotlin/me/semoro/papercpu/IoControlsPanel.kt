@@ -10,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material.icons.rounded.PlayArrow
@@ -17,6 +18,8 @@ import androidx.compose.material.icons.rounded.Pause
 import androidx.compose.material.icons.rounded.SkipNext
 import androidx.compose.material.icons.rounded.SkipPrevious
 import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.FolderOpen
 import kotlinx.coroutines.flow.StateFlow
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -140,7 +143,6 @@ interface SimulationControlViewModel {
     fun stepBack(): Boolean
     fun toggleRun()
     fun reset()
-
     fun clearProgram()
 }
 
@@ -149,9 +151,118 @@ fun ControlRow(
     viewModel: SimulationControlViewModel,
     modifier: Modifier = Modifier
 ) {
-
     val isRunning by viewModel.isRunning.collectAsState()
     val isHalted by viewModel.isHalted.collectAsState()
+
+    // Check if viewModel is SimulatorViewModel to enable save/load functionality
+    val simulatorViewModel = viewModel as? SimulatorViewModel
+
+    // State for save dialog
+    var showSaveDialog by remember { mutableStateOf(false) }
+    var programName by remember { mutableStateOf("") }
+
+    // State for load dialog
+    var showLoadDialog by remember { mutableStateOf(false) }
+    var savedPrograms by remember { mutableStateOf<List<String>>(emptyList()) }
+    var selectedProgram by remember { mutableStateOf<String?>(null) }
+
+    // Save dialog
+    if (showSaveDialog && simulatorViewModel != null) {
+        AlertDialog(
+            onDismissRequest = { showSaveDialog = false },
+            title = { Text("Save Program") },
+            text = {
+                OutlinedTextField(
+                    value = programName,
+                    onValueChange = { programName = it },
+                    label = { Text("Program Name") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        if (programName.isNotEmpty()) {
+                            simulatorViewModel.saveProgramAs(programName)
+                            showSaveDialog = false
+                            programName = ""
+                        }
+                    }
+                ) {
+                    Text("Save")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showSaveDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
+    // Load dialog
+    if (showLoadDialog && simulatorViewModel != null) {
+        // Load saved program names when dialog is shown
+        LaunchedEffect(showLoadDialog) {
+            savedPrograms = simulatorViewModel.getSavedProgramNames()
+        }
+
+        AlertDialog(
+            onDismissRequest = { showLoadDialog = false },
+            title = { Text("Load Program") },
+            text = {
+                Column {
+                    if (savedPrograms.isEmpty()) {
+                        Text("No saved programs found")
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier.heightIn(max = 200.dp)
+                        ) {
+                            items(savedPrograms) { name ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp)
+                                        .clickable { selectedProgram = name },
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    RadioButton(
+                                        selected = selectedProgram == name,
+                                        onClick = { selectedProgram = name }
+                                    )
+                                    Text(
+                                        text = name,
+                                        modifier = Modifier.padding(start = 8.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        selectedProgram?.let { name ->
+                            simulatorViewModel.loadProgramByName(name)
+                            showLoadDialog = false
+                            selectedProgram = null
+                        }
+                    },
+                    enabled = selectedProgram != null
+                ) {
+                    Text("Load")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showLoadDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -203,6 +314,32 @@ fun ControlRow(
         ) {
             Icon(Icons.Rounded.Clear, contentDescription = "Clear")
         }
+
+        // Save button (only if viewModel is SimulatorViewModel)
+        if (simulatorViewModel != null) {
+            IconButton(
+                onClick = { showSaveDialog = true },
+                enabled = !isRunning,
+                modifier = Modifier.weight(1f)
+            ) {
+                Icon(
+                    Icons.Filled.Save,
+                    contentDescription = "Save Program"
+                )
+            }
+
+            // Load button (only if viewModel is SimulatorViewModel)
+            IconButton(
+                onClick = { showLoadDialog = true },
+                enabled = !isRunning,
+                modifier = Modifier.weight(1f)
+            ) {
+                Icon(
+                    Icons.Filled.FolderOpen,
+                    contentDescription = "Load Program"
+                )
+            }
+        }
     }
 }
 
@@ -220,6 +357,7 @@ fun ControlRowPreview() {
             override fun clearProgram() {}
         }
 
+        // Note: Save/load buttons won't appear in preview since previewViewModel is not a SimulatorViewModel
         ControlRow(
             viewModel = previewViewModel,
             modifier = Modifier.padding(16.dp)
