@@ -38,6 +38,7 @@ fun ProgramRomPanel(viewModel: SimulatorViewModel,
             InstructionInfo(viewModel)
 
             val memory by viewModel.memory.collectAsState()
+            val reloadCounter by viewModel.programDataReloadCounter.collectAsState()
             // Program ROM editor
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
@@ -78,7 +79,8 @@ fun ProgramRomPanel(viewModel: SimulatorViewModel,
                             )
                         },
                         modifier = Modifier,
-                        valueCellNodePositionContainer = viewModel
+                        valueCellNodePositionContainer = viewModel,
+                        programDataReloadValue = reloadCounter
                     )
                 }
             }

@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 
 data class InsnDec(
@@ -56,6 +57,9 @@ class Simulator {
 
     private val _pcPointer = MutableStateFlow<Int?>(null)
     val pcPointer: StateFlow<Int?> = _pcPointer.asStateFlow()
+
+    private val _programDataReloadCounter = MutableStateFlow<Int>(0)
+    val programDataReloadCounter = _programDataReloadCounter.asStateFlow()
 
     val output = MutableSharedFlow<Int?>(replay = 1)
 
@@ -172,8 +176,7 @@ class Simulator {
                 src = src,
                 dst = dst,
                 valueSrc = memory[src],
-                valueDst = memory[dst],
-                outBefore = memory[11]
+                valueDst = memory[dst]
             )
         )
     }
@@ -195,9 +198,6 @@ class Simulator {
 
         // Restore memory values
         currentMemory[entry.dst] = entry.valueDst
-
-        // Restore output
-        currentMemory[OUT] = entry.outBefore
 
         // Recompute derived registers
         recomputeDerivedRegisters(currentMemory)
@@ -254,6 +254,7 @@ class Simulator {
         newMemory[55] = 1
 
         _memory.value = newMemory
+        _programDataReloadCounter.update { i -> i + 1 }
     }
 
 
@@ -272,6 +273,9 @@ class Simulator {
             newMemory[i] = programData.packed[i - 50].toInt()
         }
         _memory.value = newMemory
+        reset()
+        decodeCurrentInstructionAndUpdatePointers()
+        _programDataReloadCounter.update { i -> i + 1 }
     }
 
     /**
@@ -302,23 +306,6 @@ class Simulator {
     }
 
     /**
-     * Updates the entire memory array with new values.
-     * This will clear the history buffer as it's a manual edit.
-     */
-    fun updateMemoryArray(newMemory: IntArray) {
-        if (newMemory.size == 100) {
-            // Make a copy to avoid external modifications
-            val memCopy = newMemory.copyOf()
-
-            // Recompute derived registers
-            recomputeDerivedRegisters(memCopy)
-
-            _memory.value = memCopy
-            historyBuffer.clear() // Clear history on manual edit
-        }
-    }
-
-    /**
      * Data class representing an entry in the history buffer.
      */
     data class HistoryEntry(
@@ -327,8 +314,7 @@ class Simulator {
         val src: Int,
         val dst: Int,
         val valueSrc: Int,
-        val valueDst: Int,
-        val outBefore: Int
+        val valueDst: Int
     )
 
     companion object {

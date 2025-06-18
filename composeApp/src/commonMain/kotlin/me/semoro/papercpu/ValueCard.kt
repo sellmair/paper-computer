@@ -208,6 +208,7 @@ fun RowValueCard(
 
     // Layout and style properties
     isEditable: Boolean = false,
+    programDataReloadValue: Int = 0,
     isDerived: Boolean = false,
     isSpecial: Boolean = false,
 
@@ -301,7 +302,7 @@ fun RowValueCard(
                 .padding(horizontal = 8.dp)
         ) {
             if (isEditable && onValueChange != null) {
-                var textValue by remember { mutableStateOf(valueText) }
+                var textValue by remember(programDataReloadValue) { mutableStateOf(valueText) }
 
                 OutlinedTextField(
                     value = textValue,

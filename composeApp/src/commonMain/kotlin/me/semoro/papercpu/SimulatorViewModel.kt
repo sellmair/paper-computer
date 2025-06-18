@@ -54,6 +54,8 @@ class SimulatorViewModel: ValueCellNodePositionContainer, SimulationControlViewM
     val writePointer = simulator.writePointer
     val pcPointer = simulator.pcPointer
 
+    val programDataReloadCounter = simulator.programDataReloadCounter
+
 
     private val _editingCellAddress = MutableStateFlow<Int?>(null)
     val editingCellAddress = _editingCellAddress.asStateFlow()
@@ -107,8 +109,8 @@ class SimulatorViewModel: ValueCellNodePositionContainer, SimulationControlViewM
         coroutineScope.launch {
             val savedMemory = storage.loadProgram()
             if (savedMemory != null) {
-                simulator.updateProgramData(savedMemory)
                 simulator.reset()
+                simulator.updateProgramData(savedMemory)
             }
         }
         coroutineScope.launch {
@@ -231,17 +233,8 @@ class SimulatorViewModel: ValueCellNodePositionContainer, SimulationControlViewM
         saveProgram()
     }
 
-    /**
-     * Resets the simulator to its initial state and saves the program.
-     * Also saves the state before resetting as "before_reset_<counter>"
-     */
-    @OptIn(ExperimentalTime::class)
     override fun reset() {
         stopRun()
-
-        val td = kotlinx.datetime.Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-        // Save the state before resetting
-        saveProgramAs("before_reset_${td}")
 
         simulator.reset()
         _outputLog.value = emptyList()
@@ -251,7 +244,15 @@ class SimulatorViewModel: ValueCellNodePositionContainer, SimulationControlViewM
         saveProgram()
     }
 
+    /**
+     * Clear the program
+     * Also saves the state before resetting as "before_clear_<counter>"
+     */
     override fun clearProgram() {
+        val td = kotlinx.datetime.Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+        // Save the state before resetting
+        saveProgramAs("before_clear_${td}")
+
         reset()
         simulator.resetProgram()
     }
@@ -294,8 +295,10 @@ class SimulatorViewModel: ValueCellNodePositionContainer, SimulationControlViewM
         coroutineScope.launch {
             val savedMemory = storage.loadProgramByName(name)
             if (savedMemory != null) {
-                simulator.updateProgramData(savedMemory)
                 simulator.reset()
+                simulator.updateProgramData(savedMemory)
+                // Save the program after loading
+                saveProgram()
             }
         }
     }
