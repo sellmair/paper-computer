@@ -4,12 +4,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.SkipNext
-import androidx.compose.material.icons.filled.SkipPrevious
-import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -124,30 +118,21 @@ private fun ControlRow(
             enabled = !isRunning,
             modifier = Modifier.weight(1f)
         ) {
-            Icon(
-                imageVector = Icons.Filled.SkipPrevious,
-                contentDescription = "Step Back"
-            )
+            Text("|<")
         }
 
         IconButton(
             onClick = { viewModel.step() },
             modifier = Modifier.weight(1f)
         ) {
-            Icon(
-                imageVector = Icons.Filled.SkipNext,
-                contentDescription = "Step Forward"
-            )
+           Text(">|")
         }
 
         IconButton(
             onClick = { viewModel.toggleRun() },
             modifier = Modifier.weight(1f)
         ) {
-            Icon(
-                imageVector = if (isRunning) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                contentDescription = if (isRunning) "Pause" else "Play"
-            )
+            Text(if (isRunning) "⏸️" else "▶️")
         }
 
         IconButton(
@@ -155,10 +140,7 @@ private fun ControlRow(
             enabled = !isRunning,
             modifier = Modifier.weight(1f)
         ) {
-            Icon(
-                imageVector = Icons.Filled.Refresh,
-                contentDescription = "Reset"
-            )
+            Text("🔄")
         }
     }
 }
