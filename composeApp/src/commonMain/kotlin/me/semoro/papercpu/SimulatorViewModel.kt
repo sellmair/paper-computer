@@ -1,7 +1,9 @@
 package me.semoro.papercpu
 
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateSetOf
 import androidx.compose.runtime.snapshots.SnapshotStateMap
+import androidx.compose.runtime.snapshots.SnapshotStateSet
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import kotlinx.coroutines.CoroutineScope
@@ -65,6 +67,33 @@ class SimulatorViewModel: ValueCellNodePositionContainer, SimulationControlViewM
     val outputLog: StateFlow<List<Int>> = _outputLog.asStateFlow()
 
     override val cellUiNodePosition = mutableStateMapOf<Int, CellNodePositions>()
+
+    // Breakpoint state
+    val breakpoints = mutableStateSetOf<Int>()
+
+    /**
+     * Toggles a breakpoint at the specified address.
+     * @param address The address to toggle the breakpoint at
+     * @return true if a breakpoint was added, false if it was removed
+     */
+    fun toggleBreakpoint(address: Int): Boolean {
+        return if (breakpoints.contains(address)) {
+            breakpoints.remove(address)
+            false
+        } else {
+            breakpoints.add(address)
+            true
+        }
+    }
+
+    /**
+     * Checks if an address has a breakpoint.
+     * @param address The address to check
+     * @return true if the address has a breakpoint, false otherwise
+     */
+    fun hasBreakpoint(address: Int): Boolean {
+        return breakpoints.contains(address)
+    }
 
 
     init {
@@ -140,24 +169,39 @@ class SimulatorViewModel: ValueCellNodePositionContainer, SimulationControlViewM
             _isRunning.value = true
 
             while (isActive) {
-                val pc = memory.value[Simulator.PC]
-                val instr = memory.value[pc]
+                run {
+                    val pc = memory.value[Simulator.PC]
+                    val instr = memory.value[pc]
 
-                if (instr == 0) {
-                    // HALT instruction, stop running
-                    _isHalted.value = true
-                    stopRun()
-                    break
+                    if (instr == 0) {
+                        // HALT instruction, stop running
+                        _isHalted.value = true
+                        stopRun()
+                        break
+                    }
                 }
 
-                val (src, dst) = decodeInstruction(instr)
-
-                if (src == Simulator.INP) {
-                    stopRun()
-                    break
-                }
 
                 simulator.step()
+
+                run {
+                    val pc = memory.value[Simulator.PC]
+                    val instr = memory.value[pc]
+
+                    // Check if we hit a breakpoint
+                    if (breakpoints.contains(pc)) {
+                        // Pause at breakpoint
+                        stopRun()
+                        break
+                    }
+
+                    val (src, dst) = decodeInstruction(instr)
+
+                    if (src == Simulator.INP) {
+                        stopRun()
+                        break
+                    }
+                }
 
                 // Limit execution speed to avoid UI freezing
                 delay(100) // 10 steps per second, can be adjusted

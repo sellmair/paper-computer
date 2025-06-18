@@ -10,7 +10,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -54,7 +53,6 @@ fun RegistersPanel(viewModel: SimulatorViewModel, modifier: Modifier = Modifier.
                 address = 1,
                 value = memory[1],
                 isSpecial = true,
-                isPC = true,
                 isReadFrom = 1 == readPointer,
                 isWrittenTo = 1 == writePointer
             )
@@ -176,33 +174,39 @@ fun RegistersPanel(viewModel: SimulatorViewModel, modifier: Modifier = Modifier.
             )
 
             // Current instruction
-            Spacer(modifier = Modifier.Companion.weight(1f))
+//            Spacer(modifier = Modifier.Companion.weight(1f))
+        }
+    }
+}
 
-            val pc = memory[1]
-            val instr = memory[pc]
-            val src = instr / 100
-            val dst = instr % 100
 
-            Card(
-                modifier = Modifier.Companion.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
-                )
-            ) {
-                Column(modifier = Modifier.Companion.padding(8.dp)) {
-                    Text(
-                        text = "Current Instruction",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Text("PC: @${pc.toString().padStart(2, '0')}")
-                    Text("Instruction: ${instr.toString().padStart(4, '0')}")
-                    Text(
-                        "Source: @${src.toString().padStart(2, '0')} → Destination: @${
-                            dst.toString().padStart(2, '0')
-                        }"
-                    )
-                }
-            }
+
+@Composable
+fun InstructionInfo(viewModel: SimulatorViewModel) {
+    val memory by viewModel.memory.collectAsState()
+    val pc = memory[1]
+    val instr = memory[pc]
+    val src = instr / 100
+    val dst = instr % 100
+
+    Card(
+        modifier = Modifier.Companion.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        )
+    ) {
+        Column(modifier = Modifier.Companion.padding(8.dp)) {
+            Text(
+                text = "Current Instruction",
+                style = MaterialTheme.typography.titleMedium
+            )
+            Text("PC: @${pc.toString().padStart(2, '0')}")
+            Text("Instruction: ${instr.toString().padStart(4, '0')}")
+            Text(
+                "Source: @${src.toString().padStart(2, '0')} -> Destination: @${
+                    dst.toString().padStart(2, '0')
+                }"
+            )
         }
     }
 }
@@ -215,20 +219,17 @@ fun RegisterRow(
     value: Int,
     isDerived: Boolean = false,
     isSpecial: Boolean = false,
-    isPC: Boolean = false,
     isReadFrom: Boolean = false,
     isWrittenTo: Boolean = false
 ) {
-    ValueCard(
+    RowValueCard(
         value = value,
-        name = name,
-        address = address,
-        isPC = isPC,
         isReadFrom = isReadFrom,
         isWrittenTo = isWrittenTo,
+        address = address,
+        name = name,
         isDerived = isDerived,
         isSpecial = isSpecial,
-        layout = ValueCardLayout.ROW,
         modifier = Modifier.Companion,
         valueCellNodePositionContainer = viewModel
     )

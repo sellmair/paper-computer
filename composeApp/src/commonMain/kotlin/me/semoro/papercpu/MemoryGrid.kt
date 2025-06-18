@@ -10,12 +10,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun MemoryGrid(viewModel: SimulatorViewModel,
-               modifier: Modifier = Modifier) {
+fun MemoryGrid(
+    viewModel: SimulatorViewModel,
+    modifier: Modifier = Modifier,
+    range: IntRange
+) {
     val memory by viewModel.memory.collectAsState()
     val readPointer by viewModel.readPointer.collectAsState()
     val writePointer by viewModel.writePointer.collectAsState()
-    val isRunning by viewModel.isRunning.collectAsState()
 
     // Keep track of cell positions
 
@@ -37,30 +39,22 @@ fun MemoryGrid(viewModel: SimulatorViewModel,
 
                 // Memory grid excluding registers (0-12) and ROM (50-99)
                 LazyVerticalGrid(
-                    columns = GridCells.FixedSize(90.dp),
+                    columns = GridCells.Fixed(5),
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    items(List(37) { it + 13 }) { address ->
+                    items(range.toList()) { address ->
                         Box(
                             modifier = Modifier
                         ) {
-                            ValueCard(
+                            BoxValueCard(
                                 value = memory[address],
-                                address = address,
                                 isPC = address == memory[1],
                                 isReadFrom = address == readPointer,
                                 isWrittenTo = address == writePointer,
-                                isRunning = isRunning,
-                                onValueChange = {
-                                    newValue: Int ->
-                                    if (!isRunning) {
-                                        viewModel.updateMemory(address, newValue)
-                                    }
-                                },
-                                layout = ValueCardLayout.BOX,
-                                valueCellNodePositionContainer = viewModel,
+                                address = address,
+                                valueCellNodePositionContainer = viewModel
                             )
                         }
                     }

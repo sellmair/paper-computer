@@ -35,6 +35,7 @@ fun ProgramRomPanel(viewModel: SimulatorViewModel,
             )
 
             ControlRow(viewModel)
+            InstructionInfo(viewModel)
 
             // Program ROM editor
             LazyColumn(
@@ -45,29 +46,29 @@ fun ProgramRomPanel(viewModel: SimulatorViewModel,
                     val value1 = memory[address]
                     val src = value1 / 100
                     val dst = value1 % 100
-                    ValueCard(
+                    RowValueCard(
                         value = value1,
-                        address = address,
-                        isPC = address == memory[1],
                         isReadFrom = address == readPointer,
                         isWrittenTo = address == writePointer,
                         isRunning = isRunning,
                         onValueChange = { newValue: Int ->
-                                            if (!isRunning) {
-                                                viewModel.updateMemory(address, newValue)
-                                            }
-                                        },
-                        onChangeEditState = { bool ->
+                            if (!isRunning) {
+                                viewModel.updateMemory(address, newValue)
+                            }
+                        },
+                        onChangeEditState = { bool: Boolean ->
                             if (bool) {
                                 viewModel.setEditingActive(address)
                             } else {
                                 viewModel.setEditingActive(null)
                             }
                         },
-                        layout = ValueCardLayout.ROW,
+                        // Breakpoint properties
+                        isBreakpoint = viewModel.hasBreakpoint(address),
+                        onToggleBreakpoint = { addr: Int -> viewModel.toggleBreakpoint(addr) },
+                        isAtBreakpoint = address == memory[1] && viewModel.hasBreakpoint(address),
+                        address = address,
                         isEditable = true,
-                        modifier = Modifier,
-                        valueCellNodePositionContainer = viewModel,
                         additionalContent = {
                             // Decode preview
                             Text(
@@ -76,7 +77,9 @@ fun ProgramRomPanel(viewModel: SimulatorViewModel,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
-                        }
+                        },
+                        modifier = Modifier,
+                        valueCellNodePositionContainer = viewModel
                     )
                 }
             }

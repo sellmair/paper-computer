@@ -99,8 +99,11 @@ fun PCOverlay(
     boxColor: Color = Color(0xFF6495ED), // Cornflower blue to match the screenshot
     textColor: Color = Color.White,
     opacity: Float = 1f,
-    cornerRadius: Float = 20f
+    cornerRadius: Float = 20f,
+    isAtBreakpoint: Boolean = false
 ) {
+    // Use yellow color when at breakpoint
+    val actualBoxColor = if (isAtBreakpoint) Color(0xFFC6650A) else boxColor
     val measurer = rememberTextMeasurer()
     Canvas(modifier = modifier.fillMaxSize()) {
 
@@ -124,7 +127,7 @@ fun PCOverlay(
 
         // Draw the filled rounded rectangle
         drawRoundRect(
-            color = boxColor,
+            color = actualBoxColor,
             topLeft = newRect.topLeft,
             size = newRect.size,
             cornerRadius = CornerRadius(cornerRadius, cornerRadius),
@@ -132,7 +135,7 @@ fun PCOverlay(
             alpha = opacity
         )
         drawRoundRect(
-            boxColor,
+            actualBoxColor,
             topLeft = textBlockRect.topLeft,
             size = textBlockRect.size,
             cornerRadius = CornerRadius(cornerRadius, cornerRadius),
@@ -159,7 +162,21 @@ fun PCOverlayPreview() {
     MaterialTheme {
         Surface {
             PCOverlay(
-                rect = Rect(100f, 100f, 300f, 200f)
+                rect = Rect(100f, 100f, 300f, 200f),
+                isAtBreakpoint = false
+            )
+        }
+    }
+}
+
+@Composable
+@Preview
+fun PCOverlayBreakpointPreview() {
+    MaterialTheme {
+        Surface {
+            PCOverlay(
+                rect = Rect(100f, 100f, 300f, 200f),
+                isAtBreakpoint = true
             )
         }
     }

@@ -35,7 +35,8 @@ fun App() {
                 // Memory grid
                 MemoryGrid(
                     viewModel = viewModel,
-                    modifier = Modifier.weight(0.5f)
+                    modifier = Modifier.weight(0.5f),
+                    range = 20 until 50
                 )
                 Spacer(modifier = Modifier.width(16.dp))
 
@@ -76,7 +77,8 @@ fun App() {
                 )
                 PCOverlay(
                     rect = targetRect.value,
-                    opacity = targetOpacity
+                    opacity = targetOpacity,
+                    isAtBreakpoint = pcp?.let { viewModel.hasBreakpoint(it) } ?: false
                 )
             }
 
