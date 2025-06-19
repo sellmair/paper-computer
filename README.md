@@ -1,6 +1,6 @@
 # PaperCPU - MOV-Only Architecture Simulator
 
-[Try it!](https://semoro.github.com/paper-computer)
+[Try it!](https://semoro.github.io/paper-computer)
 
 PaperCPU is an interactive simulator for a minimal "paper computer" architecture where every instruction is a single `MOV` operation encoded as a four-digit decimal number. This educational tool demonstrates fundamental computer architecture concepts through a simplified model.
 

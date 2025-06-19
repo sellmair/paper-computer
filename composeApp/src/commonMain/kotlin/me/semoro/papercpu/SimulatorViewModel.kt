@@ -246,8 +246,12 @@ class SimulatorViewModel: ValueCellNodePositionContainer, SimulationControlViewM
      */
     override fun clearProgram() {
         val td = kotlinx.datetime.Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-        // Save the state before resetting
-        saveProgramAs("before_clear_${td}")
+
+        val data = simulator.getProgramData()
+        coroutineScope.launch {
+            // Save the state before resetting
+            storage.saveProgramAs("before_clear_${td}", data)
+        }
 
         reset()
         simulator.resetProgram()
