@@ -72,7 +72,7 @@ fun ProgramRomPanel(viewModel: SimulatorViewModel,
                         additionalContent = {
                             // Decode preview
                             Text(
-                                text = "@${src.toString().padStart(2, '0')} → @${dst.toString().padStart(2, '0')}",
+                                text = "@${src.toString().padStart(2, '0')} -> @${dst.toString().padStart(2, '0')}",
                                 modifier = Modifier.padding(start = 25.dp),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant

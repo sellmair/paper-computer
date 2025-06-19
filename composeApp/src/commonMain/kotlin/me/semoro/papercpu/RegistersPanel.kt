@@ -150,7 +150,7 @@ fun RegistersPanel(viewModel: SimulatorViewModel, modifier: Modifier = Modifier.
             )
             RegisterRow(
                 viewModel = viewModel,
-                name = "GP₁",
+                name = "ZERO",
                 address = 0,
                 value = memory[10],
                 isReadFrom = 10 == readPointer,
