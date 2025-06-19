@@ -1,5 +1,7 @@
 # PaperCPU - MOV-Only Architecture Simulator
 
+[Try it!](https://semoro.github.com/paper-computer)
+
 PaperCPU is an interactive simulator for a minimal "paper computer" architecture where every instruction is a single `MOV` operation encoded as a four-digit decimal number. This educational tool demonstrates fundamental computer architecture concepts through a simplified model.
 
 ## Features
@@ -121,7 +123,8 @@ The default program swaps the values in registers A and B using a temporary regi
   - `commonMain`: Code shared across all platforms
   - Platform-specific folders for platform-specific implementations
 - `/iosApp`: iOS application entry point
-
+- `/.github/workflows`: GitHub Actions workflows
+  - `deploy-wasm.yml`: Workflow to deploy the WASM build to GitHub Pages
 
 ## License
 
