@@ -99,15 +99,17 @@ PaperCPU is an interactive simulator for a minimal "paper computer" architecture
 
 ### Sample Program
 
-The default program swaps the values in registers A and B using a temporary register:
+The default program takes input values for A and B, compares them, and outputs either sum or subtraction of it:
 
 ```
-50: 0209 - MOV A to TMP (Copy A (addr 02) to TMP (addr 09))
-51: 0302 - MOV B to A (Copy B (addr 03) to A (addr 02))
-52: 0903 - MOV TMP to B (Copy TMP (addr 09) to B (addr 03))
-53: 0211 - MOV A to OUT (Copy A (addr 02) to OUT (addr 11))
-54: 0311 - MOV B to OUT (Copy B (addr 03) to OUT (addr 11))
-55: 0000 - HALT
+50: 1202 - MOV IN to A (Copy input (addr 12) to A (addr 02))
+51: 1203 - MOV IN to B (Copy input (addr 12) to B (addr 03))
+52: 0608 - MOV CMP to C (Copy comparison result (addr 06) to C (addr 08))
+53: 0409 - MOV SUM to TMP (Copy sum (addr 04) to TMP (addr 09))
+54: 0502 - MOV SUB to A (Copy subtraction result (addr 05) to A (addr 02))
+55: 0903 - MOV TMP to B (Copy TMP (addr 09) to B (addr 03))
+56: 0711 - MOV TRN to OUT (Copy ternary result (addr 07) to OUT (addr 11))
+57: 0000 - HALT
 ```
 
 ## Technologies Used

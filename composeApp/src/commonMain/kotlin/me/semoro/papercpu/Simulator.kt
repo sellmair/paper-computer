@@ -245,24 +245,62 @@ class Simulator {
     fun resetProgram() {
         val newMemory = _memory.value.copyOf()
         newMemory.fill(0, fromIndex = 50)
-        // Sample program: Copy values around and then halt
-        // 50: MOV A to TMP (0209) - Copy A (addr 02) to TMP (addr 09)
-        // 51: MOV B to A (0302) - Copy B (addr 03) to A (addr 02)
-        // 52: MOV TMP to B (0903) - Copy TMP (addr 09) to B (addr 03)
-        // 53: MOV A to OUT (0211) - Copy A (addr 02) to OUT (addr 11)
-        // 54: MOV B to OUT (0311) - Copy B (addr 03) to OUT (addr 11)
-        // 55: MOV 00 to PC (0001) - HALT by jumping to address 00
-        newMemory[50] = 209
-        newMemory[51] = 302
-        newMemory[52] = 903
-        newMemory[53] = 211
-        newMemory[54] = 311
-        newMemory[55] = 1
+
+        assemble(newMemory) {
+            inp(OP_A)
+            inp(OP_B)
+            setC(CMP)
+            mov(SUM, TMP)
+            mov(SUB, OP_A)
+            mov(TMP, OP_B)
+            out(TRN)
+            halt()
+        }
 
         _memory.value = newMemory
         _programDataReloadCounter.update { i -> i + 1 }
     }
 
+    data class AsmCtx(
+        val range: IntRange,
+        val instr: MutableList<Int> = mutableListOf()
+    ) {
+        fun mov(src: Int, dst: Int) {
+            instr.add((src % 100) * 100 + (dst % 100))
+        }
+
+        fun inp(dst: Int) {
+            mov(INP, dst)
+        }
+
+        fun out(src: Int) {
+            mov(src, OUT)
+        }
+
+        fun setA(src: Int) {
+            mov(src, OP_A)
+        }
+
+        fun setB(src: Int) {
+            mov(src, OP_B)
+        }
+
+        fun setC(src: Int) {
+            mov(src, OP_C)
+        }
+
+        fun halt() {
+            mov(HALT, HALT)
+        }
+    }
+
+    inline fun assemble(newMemory: IntArray, action: AsmCtx.() -> Unit) {
+        val ctx = AsmCtx(range = 50..99).apply(action)
+
+        ctx.instr.forEachIndexed { idx, value ->
+            newMemory[idx + ctx.range.start] = value
+        }
+    }
 
     fun getProgramData(): ProgramData {
         return ProgramData(
@@ -335,6 +373,9 @@ class Simulator {
         const val CMP = 6
         const val TRN = 7
         const val OP_C = 8
+
+        const val TMP = 9
+        const val TMP2 = 10
         const val OUT = 11
         const val INP = 12
         const val HALT = 0
